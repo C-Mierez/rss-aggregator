@@ -1,7 +1,11 @@
 package main
 
-import "fmt"
+import (
+	"github.com/c-mierez/rss-aggregator/internal/env"
+)
 
 func main() {
-	fmt.Println("Hello, World!")
+	// Check Environment Variable definitions
+	env.LoadAndCheckENV(true)
+
 }
