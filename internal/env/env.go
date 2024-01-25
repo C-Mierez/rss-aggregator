@@ -12,7 +12,8 @@ type EnvVariables string
 
 // @dev Add all environment variables here and update the LoadAndCheck function
 const (
-	PORT EnvVariables = "PORT"
+	PORT         EnvVariables = "PORT"
+	DATABASE_URL EnvVariables = "DATABASE_URL"
 )
 
 func LoadAndCheck(shouldLog bool) {
@@ -22,7 +23,7 @@ func LoadAndCheck(shouldLog bool) {
 	}
 
 	// Check if all environment variables are set
-	for _, key := range []EnvVariables{PORT} {
+	for _, key := range []EnvVariables{PORT, DATABASE_URL} {
 		_, ok := os.LookupEnv(string(key))
 		if !ok {
 			log.Fatalf("Environment variable %s is not set.\n", key)
