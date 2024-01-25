@@ -7,22 +7,33 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func LoadAndCheckENV(shouldLog bool) {
+// Create a map of all environment variables
+type EnvVariables string
+
+// @dev Add all environment variables here and update the LoadAndCheck function
+const (
+	PORT EnvVariables = "PORT"
+)
+
+func LoadAndCheck(shouldLog bool) {
 	// Load .env file
-	godotenv.Load()
-
-	// Create a map of all environment variables
-	envVars := map[string]string{
-		"PORT": os.Getenv("PORT"),
+	if err := godotenv.Load(); err != nil {
+		log.Fatalf("No .env file found. Error: %s\n", err.Error())
 	}
 
-	// Check if any of the environment variables are empty
-	for key, value := range envVars {
-		if value == "" {
-			log.Fatalf("Environment variable %s is not set", key)
-		}
-		if shouldLog {
-			log.Printf("ENV Variable loaded: %s=%s\n", key, value)
+	// Check if all environment variables are set
+	for _, key := range []EnvVariables{PORT} {
+		_, ok := os.LookupEnv(string(key))
+		if !ok {
+			log.Fatalf("Environment variable %s is not set.\n", key)
+		} else {
+			if shouldLog {
+				log.Printf("Environment variable %s is set to %s\n", key, os.Getenv(string(key)))
+			}
 		}
 	}
+}
+
+func Get(key EnvVariables) string {
+	return os.Getenv(string(key))
 }
