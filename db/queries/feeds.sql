@@ -21,7 +21,7 @@ WHERE
   id = $1;
 
 
--- name: GetNextFeedToFetch :one
+-- name: GetNextFeedsToFetch :many
 SELECT
   *
 FROM
@@ -29,7 +29,7 @@ FROM
 ORDER BY
   last_fetched_at ASC NULLS FIRST
 LIMIT
-  1;
+  $1;
 
 
 -- name: UpdateFeedFetchTime :one
