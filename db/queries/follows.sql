@@ -14,8 +14,9 @@ WHERE
   user_id = $1;
 
 
--- name: DeleteFollowByID :exec
+-- name: DeleteUserFollowByID :exec
 DELETE FROM
   follows
 WHERE
-  id = $1;
+  id = $1
+  AND user_id = $2;
