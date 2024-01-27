@@ -13,6 +13,7 @@ import (
 	"github.com/c-mierez/rss-aggregator/internal/handlers"
 	"github.com/c-mierez/rss-aggregator/internal/lib/queries"
 	"github.com/c-mierez/rss-aggregator/internal/middleware"
+	"github.com/c-mierez/rss-aggregator/internal/scrapper"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 
@@ -27,6 +28,7 @@ func init() {
 }
 
 func main() {
+
 	// Create a global context
 	globalCtx, globalCtxCancel := context.WithCancel(context.Background())
 
@@ -84,6 +86,10 @@ func main() {
 	graceful(
 		globalCtx,
 		func() {
+			// Start Scraping Routine
+			go scrapper.StartScraping(q, 10, 10*time.Second)
+
+			// Server HTTP Server
 			log.Printf("Starting server on PORT: %+v\n", env.Get(env.PORT))
 			if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 				log.Fatalf("Could not start server: %s\n", err.Error())
