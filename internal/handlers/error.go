@@ -3,7 +3,7 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/c-mierez/rss-aggregator/internal/lib/res"
+	"github.com/c-mierez/rss-aggregator/internal/lib/serve"
 )
 
 type ErrorHandler struct{}
@@ -13,5 +13,5 @@ func NewErrorHandler() *ErrorHandler {
 }
 
 func (h *ErrorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	res.JSONError(w, http.StatusInternalServerError, "Something went wrong")
+	serve.JSONError(w, http.StatusInternalServerError, "Something went wrong")
 }

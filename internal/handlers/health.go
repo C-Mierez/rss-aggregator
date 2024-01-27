@@ -3,7 +3,7 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/c-mierez/rss-aggregator/internal/lib/res"
+	"github.com/c-mierez/rss-aggregator/internal/lib/serve"
 )
 
 type HealthHandler struct{}
@@ -13,5 +13,5 @@ func NewHealthHandler() *HealthHandler {
 }
 
 func (h *HealthHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	res.JSONResponse(w, http.StatusOK, "OK")
+	serve.JSONResponse(w, http.StatusOK, "OK")
 }
