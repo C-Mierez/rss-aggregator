@@ -37,7 +37,7 @@ func (h *CreateFeedHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	authCTX := middleware.GetAuthCTX(r)
 
 	// Decode the request body
-	input, err := serve.JSONRequest[CreateFeedInput](w, r)
+	input, err := serve.JSONValidRequest[CreateFeedInput](w, r)
 	if err != nil {
 		return
 	}
