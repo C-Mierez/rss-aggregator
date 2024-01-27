@@ -29,6 +29,17 @@ type Follow struct {
 	UserID    uuid.UUID
 }
 
+type Post struct {
+	ID          uuid.UUID
+	Title       string
+	Description string
+	Url         string
+	PublishedAt time.Time
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	FeedID      uuid.UUID
+}
+
 type User struct {
 	ID        uuid.UUID
 	Name      string
