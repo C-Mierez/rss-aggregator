@@ -71,3 +71,11 @@ func DBToStoreFollow(dbFollow queries.Follow) Follow {
 		FeedID:    dbFollow.FeedID,
 	}
 }
+
+func DBToStoreFollows(dbFollows []queries.Follow) []Follow {
+	follows := []Follow{}
+	for _, follow := range dbFollows {
+		follows = append(follows, DBToStoreFollow(follow))
+	}
+	return follows
+}
