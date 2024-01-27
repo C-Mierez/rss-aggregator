@@ -52,3 +52,22 @@ func DBToStoreFeeds(dbFeeds []queries.Feed) []Feed {
 	}
 	return feeds
 }
+
+/* --------------------------------- Follow --------------------------------- */
+type Follow struct {
+	ID        uuid.UUID `json:"id"`
+	CreatedAt string    `json:"created_at"`
+	UpdatedAt string    `json:"updated_at"`
+	UserID    uuid.UUID `json:"user_id"`
+	FeedID    uuid.UUID `json:"feed_id"`
+}
+
+func DBToStoreFollow(dbFollow queries.Follow) Follow {
+	return Follow{
+		ID:        dbFollow.ID,
+		CreatedAt: dbFollow.CreatedAt.String(),
+		UpdatedAt: dbFollow.UpdatedAt.String(),
+		UserID:    dbFollow.UserID,
+		FeedID:    dbFollow.FeedID,
+	}
+}
