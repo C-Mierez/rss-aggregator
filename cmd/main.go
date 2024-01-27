@@ -65,6 +65,9 @@ func main() {
 	router.Get("/getFeeds", handlers.NewGetFeedsHandler(handlers.NewGetFeedsHandlerParams{
 		DB: q,
 	}).ServeHTTP)
+	router.Post("/createFollow", middleware.AuthMiddleware(handlers.NewCreateFollowHandler(handlers.NewCreateFollowHandlerParams{
+		DB: q,
+	}), q))
 
 	// Start the server
 	server := &http.Server{
