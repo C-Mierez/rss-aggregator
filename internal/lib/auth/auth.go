@@ -7,10 +7,10 @@ import (
 	"github.com/c-mierez/rss-aggregator/internal/lib/err"
 )
 
-// GetAPIKey extracts the API key from the headers of an HTTP Request
+// GetAPIKeyHeader extracts the API key from the headers of an HTTP Request
 // Example:
 // Authorization: ApiKey {API_KEY}
-func GetAPIKey(headers http.Header) (string, error) {
+func GetAPIKeyHeader(headers http.Header) (string, error) {
 	authHeader := headers.Get("Authorization")
 	if authHeader == "" {
 		return "", err.ErrNoAuthenticationFound
