@@ -71,6 +71,9 @@ func main() {
 	router.Get("/getUserFollows", middleware.AuthMiddleware(handlers.NewGetUserFollowsHandler(handlers.NewGetUserFollowsHandlerParams{
 		DB: q,
 	}), q))
+	router.Delete("/deleteFollow", middleware.AuthMiddleware(handlers.NewDeleteFollowHandler(handlers.NewDeleteFollowHandlerParams{
+		DB: q,
+	}), q))
 
 	// Start the server
 	server := &http.Server{
