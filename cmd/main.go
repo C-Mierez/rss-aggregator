@@ -11,9 +11,13 @@ import (
 
 	"github.com/c-mierez/rss-aggregator/internal/env"
 	"github.com/c-mierez/rss-aggregator/internal/handlers"
+	"github.com/c-mierez/rss-aggregator/internal/lib/queries"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
-	"github.com/jackc/pgx/v5/pgxpool"
+
+	"database/sql"
+
+	_ "github.com/lib/pq"
 )
 
 func init() {
@@ -26,10 +30,45 @@ func main() {
 	globalCtx, globalCtxCancel := context.WithCancel(context.Background())
 
 	// Connect to database
-	db := setUpDatabase(globalCtx)
+	db, err := sql.Open("postgres", env.Get(env.DATABASE_URL))
+	if err != nil {
+		log.Fatalf("Could not connect to database: %s\n", err.Error())
+	}
 
 	// Create a new router
-	router := setUpRouter()
+	router := chi.NewRouter()
+
+	router.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"https://*", "http://*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"*"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: false,
+		MaxAge:           300,
+	}))
+
+	q := queries.New(db)
+
+	// Routes
+	router.Get("/health", handlers.NewHealthHandler().ServeHTTP)
+	router.Get("/error", handlers.NewErrorHandler().ServeHTTP)
+	router.Post("/createUser", handlers.NewCreateUserHandler(handlers.NewCreateUserHandlerParams{
+		DB: q,
+	}).ServeHTTP)
+	router.Get("/getUser", handlers.NewGetUserHandler(handlers.NewGetUserHandlerParams{
+		DB: q,
+	}).ServeHTTP)
+
+	// Test
+	go func() {
+		// Get all users
+		users, err := q.GetUsers(globalCtx)
+		if err != nil {
+			log.Printf("Error getting users: %+v\n", err)
+		} else {
+			log.Printf("Users: %+v\n", users)
+		}
+	}()
 
 	// Start the server
 	server := &http.Server{
@@ -37,31 +76,36 @@ func main() {
 		Addr:    "127.0.0.1:" + env.Get(env.PORT),
 	}
 
-	gracefulShutdownWrapper(globalCtx, func() {
-		log.Printf("Starting server on PORT: %+v\n", env.Get(env.PORT))
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("Could not start server: %s\n", err.Error())
-		}
-	}, func(shutdownCtx context.Context) {
-		// Shutdown the server
-		if err := server.Shutdown(shutdownCtx); err != nil {
-			log.Fatalf("Could not gracefully shutdown server: %s\n", err.Error())
-		}
+	graceful(
+		globalCtx,
+		func() {
+			log.Printf("Starting server on PORT: %+v\n", env.Get(env.PORT))
+			if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+				log.Fatalf("Could not start server: %s\n", err.Error())
+			}
+		},
+		func(shutdownCtx context.Context) {
+			// Shutdown the server
+			if err := server.Shutdown(shutdownCtx); err != nil {
+				log.Fatalf("Could not gracefully shutdown server: %s\n", err.Error())
+			}
 
-		// Close the database connection
-		db.Close()
+			// Close the database connection
+			db.Close()
 
-		log.Println("Graceful shutdown complete.")
+			log.Println("Graceful shutdown complete.")
 
-		// Cancel the global context
-		globalCtxCancel()
-	})
+			// Cancel the global context
+			globalCtxCancel()
+		},
+	)
 
 	<-globalCtx.Done() // Wait for the global context to be cancelled
 
 }
 
-func gracefulShutdownWrapper(globalCtx context.Context, gracefulExecution func(), gracefulShutdown func(shutdownCtx context.Context)) {
+// Wrapper for handling graceful execution and shutdown
+func graceful(globalCtx context.Context, gracefulExecution func(), gracefulShutdown func(shutdownCtx context.Context)) {
 
 	// Graceful shutdown signal channel
 	shutdownChan := make(chan os.Signal, 1)
@@ -90,33 +134,4 @@ func gracefulShutdownWrapper(globalCtx context.Context, gracefulExecution func()
 
 	// Routine in which the graceful execution will take place
 	go gracefulExecution()
-}
-
-func setUpDatabase(ctx context.Context) *pgxpool.Pool {
-	db, err := pgxpool.New(ctx, env.Get(env.DATABASE_URL))
-	if err != nil {
-		log.Fatalf("Could not connect to database: %s\n", err.Error())
-	}
-
-	return db
-}
-
-func setUpRouter() *chi.Mux {
-	router := chi.NewRouter()
-
-	router.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"https://*", "http://*"},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"*"},
-		ExposedHeaders:   []string{"Link"},
-		AllowCredentials: false,
-		MaxAge:           300,
-	}))
-
-	// Routes
-	router.Get("/health", handlers.NewHealthHandler().ServeHTTP)
-
-	router.Get("/error", handlers.NewErrorHandler().ServeHTTP)
-
-	return router
 }
