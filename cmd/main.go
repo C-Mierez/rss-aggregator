@@ -12,6 +12,7 @@ import (
 	"github.com/c-mierez/rss-aggregator/internal/env"
 	"github.com/c-mierez/rss-aggregator/internal/handlers"
 	"github.com/c-mierez/rss-aggregator/internal/lib/queries"
+	"github.com/c-mierez/rss-aggregator/internal/middleware"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 
@@ -55,20 +56,15 @@ func main() {
 	router.Post("/createUser", handlers.NewCreateUserHandler(handlers.NewCreateUserHandlerParams{
 		DB: q,
 	}).ServeHTTP)
-	router.Get("/getUser", handlers.NewGetUserHandler(handlers.NewGetUserHandlerParams{
+	router.Get("/getUser", middleware.AuthMiddleware(handlers.NewGetUserHandler(handlers.NewGetUserHandlerParams{
+		DB: q,
+	}), q))
+	router.Post("/createFeed", middleware.AuthMiddleware(handlers.NewCreateFeedHandler(handlers.NewCreateFeedHandlerParams{
+		DB: q,
+	}), q))
+	router.Get("/getFeeds", handlers.NewGetFeedsHandler(handlers.NewGetFeedsHandlerParams{
 		DB: q,
 	}).ServeHTTP)
-
-	// Test
-	go func() {
-		// Get all users
-		users, err := q.GetUsers(globalCtx)
-		if err != nil {
-			log.Printf("Error getting users: %+v\n", err)
-		} else {
-			log.Printf("Users: %+v\n", users)
-		}
-	}()
 
 	// Start the server
 	server := &http.Server{
