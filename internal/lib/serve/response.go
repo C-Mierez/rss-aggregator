@@ -1,4 +1,4 @@
-package res
+package serve
 
 import (
 	"encoding/json"
