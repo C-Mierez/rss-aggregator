@@ -79,3 +79,36 @@ func DBToStoreFollows(dbFollows []queries.Follow) []Follow {
 	}
 	return follows
 }
+
+/* ---------------------------------- Posts --------------------------------- */
+type Post struct {
+	ID          uuid.UUID `json:"id"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	Url         string    `json:"url"`
+	PublishedAt string    `json:"published_at"`
+	CreatedAt   string    `json:"created_at"`
+	UpdatedAt   string    `json:"updated_at"`
+	FeedID      uuid.UUID `json:"feed_id"`
+}
+
+func DBToStorePost(dbPost queries.Post) Post {
+	return Post{
+		ID:          dbPost.ID,
+		Title:       dbPost.Title,
+		Description: dbPost.Description,
+		Url:         dbPost.Url,
+		PublishedAt: dbPost.PublishedAt.String(),
+		CreatedAt:   dbPost.CreatedAt.String(),
+		UpdatedAt:   dbPost.UpdatedAt.String(),
+		FeedID:      dbPost.FeedID,
+	}
+}
+
+func DBToStorePosts(dbPosts []queries.Post) []Post {
+	posts := []Post{}
+	for _, post := range dbPosts {
+		posts = append(posts, DBToStorePost(post))
+	}
+	return posts
+}
