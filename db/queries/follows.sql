@@ -12,3 +12,10 @@ FROM
   follows
 WHERE
   user_id = $1;
+
+
+-- name: DeleteFollowByID :exec
+DELETE FROM
+  follows
+WHERE
+  id = $1;

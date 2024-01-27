@@ -46,6 +46,18 @@ func (q *Queries) CreateFollow(ctx context.Context, arg CreateFollowParams) (Fol
 	return i, err
 }
 
+const deleteFollowByID = `-- name: DeleteFollowByID :exec
+DELETE FROM
+  follows
+WHERE
+  id = $1
+`
+
+func (q *Queries) DeleteFollowByID(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteFollowByID, id)
+	return err
+}
+
 const getFollowsByUserID = `-- name: GetFollowsByUserID :many
 SELECT
   id, created_at, updated_at, feed_id, user_id
