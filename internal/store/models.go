@@ -23,3 +23,32 @@ func DBToStoreUser(dbUser queries.User) User {
 		APIKey:    dbUser.ApiKey,
 	}
 }
+
+/* ---------------------------------- Feed ---------------------------------- */
+type Feed struct {
+	ID        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	Url       string    `json:"url"`
+	CreatedAt string    `json:"created_at"`
+	UpdatedAt string    `json:"updated_at"`
+	UserID    uuid.UUID `json:"user_id"`
+}
+
+func DBToStoreFeed(dbFeed queries.Feed) Feed {
+	return Feed{
+		ID:        dbFeed.ID,
+		Name:      dbFeed.Name,
+		Url:       dbFeed.Url,
+		CreatedAt: dbFeed.CreatedAt.String(),
+		UpdatedAt: dbFeed.UpdatedAt.String(),
+		UserID:    dbFeed.UserID,
+	}
+}
+
+func DBToStoreFeeds(dbFeeds []queries.Feed) []Feed {
+	feeds := []Feed{}
+	for _, feed := range dbFeeds {
+		feeds = append(feeds, DBToStoreFeed(feed))
+	}
+	return feeds
+}
